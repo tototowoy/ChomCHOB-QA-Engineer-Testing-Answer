@@ -1,0 +1,34 @@
+*** Settings ***
+Library    RequestsLibrary
+
+*** Variables ***
+${BASE URL}    https://reqres.in/api
+${USER ID}    1
+
+*** Test Cases ***
+Test All Users
+    [Documentation]    Test GET All Users endpoint
+    ${response}    Get Request    ${BASE URL}/users
+    Should Be Equal As Strings    ${response.status_code}    200
+
+Test User Info
+    [Documentation]    Test GET User Info endpoint
+    ${response}    Get Request    ${BASE URL}/users/${USER ID}
+    Should Be Equal As Strings    ${response.status_code}    200
+
+Test Create User
+    [Documentation]    Test POST Create User endpoint
+    ${request_body}    Create Dictionary    name=Yourname    job=Your Position
+    ${response}    Post Request    ${BASE URL}/users    json=${request_body}
+    Should Be Equal As Strings    ${response.status_code}    201
+
+Test Update User
+    [Documentation]    Test PATCH Update User endpoint
+    ${request_body}    Create Dictionary    name=Your nickname    job=Your Position
+    ${response}    Patch Request    ${BASE URL}/users/${USER ID}    json=${request_body}
+    Should Be Equal As Strings    ${response.status_code}    200
+
+Test Delete User
+    [Documentation]    Test DELETE Delete User endpoint
+    ${response}    Delete Request    ${BASE URL}/users/${USER ID}
+    Should Be Equal As Strings    ${response.status_code}    204
