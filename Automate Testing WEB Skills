@@ -1,0 +1,53 @@
+*** Settings ***
+Library  SeleniumLibrary
+
+*** Variables ***
+${BROWSER}    Chrome
+${URL}    https://www.nejavu.com
+
+*** Test Cases ***
+Test Nejavu
+    Open Browser To Nejavu
+    Click Menu Cartoon
+    Get Books Name
+    Add Books To Cart
+    Go To Cart
+    Verify Books In Cart
+    Remove All Books From Cart
+    Verify Cart Badge Is Empty
+
+*** Keywords ***
+Open Browser To Nejavu #เปิด Browser และไปที่ Link https://www.nejavu.com
+    Open Browser    ${URL}    ${BROWSER}
+    Maximize Browser Window
+    Set Selenium Speed    1s
+
+Click Menu Cartoon #Click menu “การ์ตูน”
+    Click Element    xpath://a[contains(text(),'การ์ตูน')]
+
+Get Books Name #Get ชื่อหนังสือทุกเล่มในแถวที่หนึ่ง
+    @{book_names} =    Get WebElements    xpath://div[@class="book-item-title"]
+    FOR    ${book}    IN    @{book_names}
+        Log    ${book.text}
+    END
+
+Add Books To Cart #กดปุ่ม “ใส่ตระกร้า” หนังสือทุกเล่มแถวที่หนึ่ง
+    Click Element    xpath=(//button[@class="btn btn-outline-dark add-to-cart-btn"])[1]
+
+Go To Cart #กดปุ่ม “รถเข็น / ตระกร้า”
+    Click Element    xpath://a[@class="cart-nav-link"]
+
+Verify Books In Cart #Verify ชื่อหนังสือทุกเล่ม ที่อยู่ในตระกร้า โดยใช้ชื่อที่ได้มาจากข้อที่แล้ว
+    ${cart_items} =    Get WebElements    xpath://div[@class="cart-item-title"]
+    FOR    ${book}    IN    @{cart_items}
+        ${book_name} =    Get Text    ${book}
+        Run Keyword If    '${book_name}' not in '${book_names}'    Fail    Book ${book_name} is not added to the cart
+    END
+
+Remove All Books From Cart #ลบหนังสือทุกเล่มที่อยู่ในตระกร้า
+    Click Element    xpath://button[@class="btn btn-danger remove-book-btn"]
+
+Verify Cart Badge Is Empty #Verify badge บนรถเข็นว่าเหลือหนังสือเท่ากับ 0
+    Page Should Contain Element    xpath://span[@class="badge badge-pill badge-light"]
+    ${badge_text} =    Get Text    xpath://span[@class="badge badge-pill badge-light"]
+    Should Be Equal As Strings    ${badge_text}    0
